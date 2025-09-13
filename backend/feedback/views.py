@@ -188,10 +188,14 @@ def get_metrics(request):
     total_students = User.objects(role='student').count()
     total_feedback = Feedback.objects.count()
     total_courses = Course.objects.count()
-    avg_rating = Feedback.objects.aggregate(*[
+    avg_rating_cursor = Feedback.objects.aggregate(*[
         {"$group": {"_id": None, "avg_rating": {"$avg": "$rating"}}}
     ])
-    avg_rating_value = avg_rating[0]['avg_rating'] if avg_rating else 0
+    avg_rating_value = 0
+    for doc in avg_rating_cursor:
+        avg_rating_value = doc.get('avg_rating', 0)
+        break  # only need the first (and only) document
+
 
     return Response({
         "total_students": total_students,

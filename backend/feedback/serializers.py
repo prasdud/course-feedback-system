@@ -22,7 +22,7 @@ class AdminUserSerializer(serializers.Serializer):
     email = serializers.EmailField()
     role = serializers.CharField()
     phone = serializers.CharField(required=False, allow_blank=True)
-    dob = serializers.DateField(required=False, allow_null=True)
+    dob = serializers.DateTimeField(required=False, allow_null=True)
     address = serializers.CharField(required=False, allow_blank=True)
     profile_picture = serializers.URLField(required=False, allow_blank=True)
     is_blocked = serializers.BooleanField()

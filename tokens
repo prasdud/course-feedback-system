@@ -1,6 +1,6 @@
 admin jwt token
 {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjhjNWFmOGZhY2UwNjNmNDQxMTk5OTBlIiwicm9sZSI6ImFkbWluIiwiZXhwIjoxNzU3Nzg5NjQ3fQ.VI6cQSh4shsLz7Ya1wMIlbIF8mDv6Imeh1GSf_wbpPg"
+    eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjhjNWFmOGZhY2UwNjNmNDQxMTk5OTBlIiwicm9sZSI6ImFkbWluIiwiZXhwIjoxNzU3NzkzNjg2fQ.sEi5sXI5kzBudvJvegCScHXCoPV4Ku064M2r56n8Ujw
 }
 
 student jwt token

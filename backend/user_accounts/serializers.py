@@ -8,6 +8,6 @@ class UserSerializer(serializers.Serializer):
     role = serializers.CharField(read_only=True)   # role not editable by user
     
     phone = serializers.CharField(required=False, allow_blank=True, max_length=15)
-    dob = serializers.DateField(required=False, allow_null=True)
+    dob = serializers.DateTimeField(required=False, allow_null=True)
     address = serializers.CharField(required=False, allow_blank=True, max_length=300)
     profile_picture = serializers.URLField(required=False, allow_blank=True)

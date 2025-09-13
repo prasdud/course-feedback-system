@@ -5,6 +5,9 @@ from mongoengine.errors import NotUniqueError
 from .models import User
 import bcrypt
 import re
+import jwt
+from datetime import datetime, timedelta
+from django.conf import settings
 
 # Create your views here.
 
@@ -31,3 +34,29 @@ def register(request):
         return Response({"message": "User registered successfully"})
     except NotUniqueError:
         return Response({"error": "Email already exists"}, status=400)
+
+@api_view(['POST'])
+def login(request):
+    data = request.data
+    email = data.get('email')
+    password = data.get('password')
+
+    #check user existence
+    try:
+        user = User.objects.get(email = email)
+    except User.DoesNotExist:
+        return Response({"error": "Invalid email or password"}, status=401)
+
+    #verify password
+    if not bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
+        return Response({"error": "Invalid email or password"}, status=401)
+    
+    #generate jwt
+    payload = {
+        "user_id": str(user.id),
+        "role": user.role,
+        "exp": datetime.utcnow() + timedelta(hours=1)
+    }
+    token = jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
+
+    return Response({"token": token})

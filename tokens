@@ -1,0 +1,9 @@
+admin jwt token
+{
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjhjNWFmOGZhY2UwNjNmNDQxMTk5OTBlIiwicm9sZSI6ImFkbWluIiwiZXhwIjoxNzU3Nzg5NjQ3fQ.VI6cQSh4shsLz7Ya1wMIlbIF8mDv6Imeh1GSf_wbpPg"
+}
+
+student jwt token
+{
+    eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjhjNWFjYjI3ODJmMTAwZDUyOTI3ZjU3Iiwicm9sZSI6InN0dWRlbnQiLCJleHAiOjE3NTc3ODk0MTB9.UJHH0ML6RzFPbY9i12J7_dwatQ7PeEGQ6MxgJknvWxg
+}

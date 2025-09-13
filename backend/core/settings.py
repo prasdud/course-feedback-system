@@ -11,6 +11,14 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+from mongoengine import connect
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+MONGO_URI = os.getenv('DB_URI', 'mongodb://localhost:27017/feedback_db')
+connect(host=MONGO_URI, alias='default')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,9 +45,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'corsheaders',
+    'users',
+
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -73,6 +86,7 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
+'''
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -80,6 +94,23 @@ DATABASES = {
     }
 }
 
+DATABASES = {
+    'default': {
+        'ENGINE': 'djongo',
+        'NAME': 'feedback_db',
+        'CLIENT': {
+            'host': 'mongodb://localhost:27017',
+        }
+    }
+}
+'''
+
+# DRF + JWT CONFIG
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -112,6 +143,8 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+
+CORS_ALLOW_ALL_ORIGINS = True  # (for dev only)
 
 
 # Static files (CSS, JavaScript, Images)

@@ -9,7 +9,10 @@ class User(me.Document):
     password = me.StringField(required = True, min_length=8)
     ROLE_CHOICES = [('admin', 'admin'), ('student', 'student')]
     role = me.StringField(required = True, choices=ROLE_CHOICES, default='student')
-
+    phone = me.StringField(max_length=15)
+    dob = me.DateTimeField()
+    address = me.StringField(max_length=300)
+    profile_picture = me.URLField()
 
     #mongoDB collection name
     meta = {

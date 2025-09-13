@@ -1,11 +1,12 @@
 from rest_framework.decorators import api_view, authentication_classes
 from rest_framework.response import Response
 from .models import Course, Feedback
-from .serializers import CourseSerializer, FeedbackSerializer
+from .serializers import CourseSerializer, FeedbackSerializer, AdminUserSerializer
 from user_accounts.authentication import JWTAuthentication
 from django.utils import timezone
 import csv
 from django.http import HttpResponse
+from user_accounts.models import User
 
 # --------------------------
 # Course Endpoints (Admin)
@@ -173,3 +174,119 @@ def export_feedback_csv(request):
         writer.writerow([f.student.name, f.course.name, f.rating, f.message, f.created_at])
 
     return response
+
+
+# --------------------------
+# Admin Metrics
+# --------------------------
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+def get_metrics(request):
+    if request.user.role != 'admin':
+        return Response({"error": "Admin access required"}, status=403)
+
+    total_students = User.objects(role='student').count()
+    total_feedback = Feedback.objects.count()
+    total_courses = Course.objects.count()
+    avg_rating = Feedback.objects.aggregate(*[
+        {"$group": {"_id": None, "avg_rating": {"$avg": "$rating"}}}
+    ])
+    avg_rating_value = avg_rating[0]['avg_rating'] if avg_rating else 0
+
+    return Response({
+        "total_students": total_students,
+        "total_feedback": total_feedback,
+        "total_courses": total_courses,
+        "average_rating": avg_rating_value
+    })
+
+
+# --------------------------
+# List All Students
+# --------------------------
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+def list_students(request):
+    if request.user.role != 'admin':
+        return Response({"error": "Admin access required"}, status=403)
+
+    students = User.objects(role='student')
+    serializer = AdminUserSerializer(students, many=True)
+    return Response({"students": serializer.data})
+
+
+# --------------------------
+# Block / Unblock Student
+# --------------------------
+@api_view(['PUT'])
+@authentication_classes([JWTAuthentication])
+def block_student(request, student_id):
+    if request.user.role != 'admin':
+        return Response({"error": "Admin access required"}, status=403)
+    
+    student = User.objects(id=student_id, role='student').first()
+    if not student:
+        return Response({"error": "Student not found"}, status=404)
+
+    student.is_blocked = True
+    student.save()
+    return Response({"message": f"Student {student.name} blocked"})
+
+
+@api_view(['PUT'])
+@authentication_classes([JWTAuthentication])
+def unblock_student(request, student_id):
+    if request.user.role != 'admin':
+        return Response({"error": "Admin access required"}, status=403)
+    
+    student = User.objects(id=student_id, role='student').first()
+    if not student:
+        return Response({"error": "Student not found"}, status=404)
+
+    student.is_blocked = False
+    student.save()
+    return Response({"message": f"Student {student.name} unblocked"})
+
+
+# --------------------------
+# Delete Student
+# --------------------------
+@api_view(['DELETE'])
+@authentication_classes([JWTAuthentication])
+def delete_student(request, student_id):
+    if request.user.role != 'admin':
+        return Response({"error": "Admin access required"}, status=403)
+    
+    student = User.objects(id=student_id, role='student').first()
+    if not student:
+        return Response({"error": "Student not found"}, status=404)
+
+    student.delete()
+    return Response({"message": f"Student {student.name} deleted"})
+
+
+# --------------------------
+# Feedback Trends
+# --------------------------
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+def feedback_trends(request):
+    if request.user.role != 'admin':
+        return Response({"error": "Admin access required"}, status=403)
+
+    courses = Course.objects.all()
+    trends = []
+    for course in courses:
+        feedbacks = Feedback.objects(course=course)
+        if feedbacks:
+            avg_rating = sum([f.rating for f in feedbacks]) / feedbacks.count()
+        else:
+            avg_rating = 0
+        trends.append({
+            "course_id": str(course.id),
+            "course_name": course.name,
+            "total_feedback": feedbacks.count(),
+            "average_rating": avg_rating
+        })
+
+    return Response({"trends": trends})

@@ -13,6 +13,7 @@ class User(me.Document):
     dob = me.DateTimeField()
     address = me.StringField(max_length=300)
     profile_picture = me.URLField()
+    is_blocked = me.BooleanField(default=False)
 
     #mongoDB collection name
     meta = {

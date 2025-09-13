@@ -17,4 +17,12 @@ urlpatterns = [
     # Admin feedback
     path('admin/feedback/', views.list_all_feedback, name='list_all_feedback'),
     path('admin/feedback/export/', views.export_feedback_csv, name='export_feedback_csv'),
+
+    # Admin metrics
+    path('metrics/', views.get_metrics, name='admin_metrics'),
+    path('students/', views.list_students, name='list_students'),
+    path('students/<str:student_id>/block/', views.block_student, name='block_student'),
+    path('students/<str:student_id>/unblock/', views.unblock_student, name='unblock_student'),
+    path('students/<str:student_id>/delete/', views.delete_student, name='delete_student'),
+    path('feedback-trends/', views.feedback_trends, name='feedback_trends'),
 ]

@@ -18,6 +18,7 @@ def register(request):
     name = data.get('name')
     email = data.get('email')
     password = data.get('password')
+    role = data.get("role", "student")
 
     #Validate password
     if len(password) < 8 or not re.search(r'\d', password) or not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
@@ -29,7 +30,7 @@ def register(request):
 
     #Save user
     try:
-        user = User(name=name, email=email, password=hashed_password)
+        user = User(name=name, email=email, password=hashed_password, role=role)
         user.save()
         return Response({"message": "User registered successfully"})
     except NotUniqueError:
@@ -58,5 +59,9 @@ def login(request):
         "exp": datetime.utcnow() + timedelta(hours=1)
     }
     token = jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
-
+    '''
+    token = jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
+    if isinstance(token, bytes):  
+        token = token.decode("utf-8")
+    '''
     return Response({"token": token})

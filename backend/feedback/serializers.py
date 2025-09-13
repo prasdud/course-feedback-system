@@ -15,3 +15,14 @@ class FeedbackSerializer(serializers.Serializer):
     message = serializers.CharField(required=False, allow_blank=True)
     created_at = serializers.DateTimeField(read_only=True)
     updated_at = serializers.DateTimeField(read_only=True)
+
+class AdminUserSerializer(serializers.Serializer):
+    id = serializers.CharField(read_only=True)
+    name = serializers.CharField()
+    email = serializers.EmailField()
+    role = serializers.CharField()
+    phone = serializers.CharField(required=False, allow_blank=True)
+    dob = serializers.DateField(required=False, allow_null=True)
+    address = serializers.CharField(required=False, allow_blank=True)
+    profile_picture = serializers.URLField(required=False, allow_blank=True)
+    is_blocked = serializers.BooleanField()

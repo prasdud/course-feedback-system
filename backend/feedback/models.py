@@ -2,7 +2,7 @@ import mongoengine as me
 from user_accounts.models import User
 # Create your models here.
 
-class Course():
+class Course(me.Document):
     name = me.StringField(required=True, max_length=200)
     description = me.StringField()
 

@@ -37,16 +37,14 @@ cd backend/
 
 Create and activate a virtual environment:
 
+```bash
+# For Windows
+python -m venv venv
+venv\Scripts\activate
 
 # For macOS/Linux
 python3 -m venv venv
 source venv/bin/activate
-```
-
-Install required dependencies:
-
-```bash
-pip install -r requirements.txt
 ```
 
 ### 3. Environment Configuration

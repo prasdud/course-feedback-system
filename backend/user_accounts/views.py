@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from .authentication import JWTAuthentication
 from .serializers import UserSerializer
+import cloudinary.uploader
 
 # Create your views here.
 
@@ -68,27 +69,127 @@ def login(request):
     '''
     return Response({"token": token})
 
+'''
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
 def get_profile(request):
     serializer = UserSerializer(request.user)
     return Response(serializer.data)
+'''
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+def get_profile(request):
+    try:
+        user = request.user
+        user.reload()  # Ensure we have the latest data from database
+        
+        print(f"Getting profile for user: {user.email}")
+        print(f"Profile picture in DB: {user.profile_picture}")
+        
+        serializer = UserSerializer(user)
+        return Response({
+            "user": serializer.data
+        })
+    except Exception as e:
+        print(f"Get profile error: {e}")
+        return Response({
+            "error": "Failed to get profile",
+            "details": str(e)
+        }, status=500)
 
 
 @api_view(['PUT'])
 @authentication_classes([JWTAuthentication])
 def update_profile(request):
-    data = request.data
+    data = request.data.copy()
     user = request.user
 
-    serializer = UserSerializer(user, data=data, partial=True)
-    if serializer.is_valid():
-        # update user fields manually since it's mongoengine
-        for field, value in serializer.validated_data.items():
-            setattr(user, field, value)
-        user.save()
-        return Response({"message": "Profile updated successfully"})
-    return Response(serializer.errors, status=400)
+    try:
+        print(f"Received data: {data.keys()}")  # Debug log
+        
+        # Handle profile picture upload
+        if 'profile_picture' in data and data['profile_picture']:
+            profile_pic_data = data['profile_picture']
+            print(f"Profile picture data received, length: {len(str(profile_pic_data))}")
+            
+            if isinstance(profile_pic_data, str) and profile_pic_data.startswith('data:image'):
+                try:
+                    # Upload to Cloudinary
+                    upload_result = cloudinary.uploader.upload(
+                        profile_pic_data,
+                        folder='profile_pics',
+                        overwrite=True,
+                        resource_type='image',
+                        quality='auto:good',
+                        fetch_format='auto'
+                    )
+                    
+                    # Extract just the URL string
+                    cloudinary_url = upload_result['secure_url']
+                    print(f"Cloudinary upload successful: {cloudinary_url}")
+                    
+                    # Update the data with the URL string
+                    data['profile_picture'] = cloudinary_url
+                    
+                except Exception as upload_error:
+                    print(f"Cloudinary upload error: {upload_error}")
+                    return Response({
+                        "error": "Failed to upload image",
+                        "details": str(upload_error)
+                    }, status=400)
+            else:
+                # Invalid format, remove from data
+                data.pop('profile_picture', None)
+                print("Invalid profile picture format, skipping")
+
+        # Validate data with serializer (excluding profile_picture for now)
+        profile_picture_url = data.pop('profile_picture', None)
+        
+        serializer = UserSerializer(user, data=data, partial=True)
+        if serializer.is_valid():
+            print(f"Serializer validation passed")
+            
+            # Update user fields manually
+            for field, value in serializer.validated_data.items():
+                if hasattr(user, field):
+                    setattr(user, field, value)
+                    print(f"Updated {field}: {value}")
+            
+            # Handle profile picture separately to ensure it's saved as string
+            if profile_picture_url:
+                user.profile_picture = str(profile_picture_url)  # Ensure it's a string
+                print(f"Set profile_picture: {user.profile_picture}")
+            
+            # Update timestamp
+            user.updated_at = datetime.utcnow()
+            
+            # Save the user
+            user.save()
+            print(f"User saved successfully")
+            
+            # Verify what was actually saved
+            user.reload()  # Reload from database
+            print(f"After reload, profile_picture: {user.profile_picture}")
+            
+            # Return updated data
+            updated_serializer = UserSerializer(user)
+            return Response({
+                "message": "Profile updated successfully",
+                "user": updated_serializer.data
+            })
+        else:
+            print(f"Serializer validation failed: {serializer.errors}")
+            return Response(serializer.errors, status=400)
+            
+    except Exception as e:
+        print(f"Profile update error: {e}")
+        import traceback
+        traceback.print_exc()
+        return Response({
+            "error": "Failed to update profile",
+            "details": str(e)
+        }, status=500)
+
 
 
 @api_view(['PUT'])

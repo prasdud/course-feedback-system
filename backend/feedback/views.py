@@ -112,6 +112,7 @@ def submit_feedback(request):
         return Response({"message": "Feedback submitted successfully"})
     else:
         return Response(serializer.errors, status=400)
+    
 
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
@@ -122,7 +123,6 @@ def list_feedback(request):
     feedbacks = Feedback.objects(student=request.user)
     serializer = FeedbackSerializer(feedbacks, many=True)
     return Response({"feedbacks": serializer.data})
-
 
 @api_view(['PUT'])
 @authentication_classes([JWTAuthentication])
@@ -135,16 +135,13 @@ def edit_feedback(request, feedback_id):
     if feedback.student != request.user:
         return Response({"error": "Cannot edit others' feedback"}, status=403)
 
-    serializer = FeedbackSerializer(data=request.data)
+    serializer = FeedbackSerializer(feedback, data=request.data, partial=True)  # bind to instance
     if serializer.is_valid():
-        feedback.update(
-            rating=serializer.validated_data['rating'],
-            message=serializer.validated_data.get('message', feedback.message),
-            updated_at=timezone.now()
-        )
+        serializer.save(updated_at=timezone.now())
         return Response({"message": "Feedback updated successfully"})
     else:
         return Response(serializer.errors, status=400)
+
 
 
 @api_view(['DELETE'])
@@ -172,6 +169,23 @@ def list_all_feedback(request):
         return Response({"error": "Admin access required"}, status=403)
 
     feedbacks = Feedback.objects.all()
+
+    # Get query params
+    course_id = request.query_params.get('course_id')
+    rating = request.query_params.get('rating')
+    student_name = request.query_params.get('student_name')
+
+    if course_id:
+        feedbacks = feedbacks.filter(course__id=course_id)
+    if rating:
+        try:
+            rating = int(rating)
+            feedbacks = feedbacks.filter(rating=rating)
+        except ValueError:
+            pass
+    if student_name:
+        feedbacks = feedbacks.filter(student__name__icontains=student_name)
+
     serializer = FeedbackSerializer(feedbacks, many=True)
     return Response({"feedbacks": serializer.data})
 

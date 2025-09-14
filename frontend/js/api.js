@@ -85,6 +85,28 @@ class ApiClient {
         return this.request('/api/courses/');
     }
 
+    // Get single course
+    async getCourse(courseId) {
+        return this.request(`/api/courses/${courseId}/`);
+    }
+
+
+    // Update course
+    async updateCourse(courseId, data) {
+        return this.request(`/api/courses/${courseId}/edit/`, {
+            method: 'PUT',
+            body: JSON.stringify(data)
+        });
+    }
+
+    // Delete course
+    async deleteCourse(courseId) {
+        return this.request(`/api/courses/${courseId}/delete/`, {
+            method: 'DELETE'
+        });
+    }
+
+
     // Feedback endpoints
     async submitFeedback(feedbackData) {
         return this.request('/api/feedback/submit/', {
@@ -115,13 +137,13 @@ class ApiClient {
 
     async blockStudent(studentId) {
         return this.request(`/api/students/${studentId}/block/`, {
-            method: 'POST'
+            method: 'PUT'
         });
     }
 
     async unblockStudent(studentId) {
         return this.request(`/api/students/${studentId}/unblock/`, {
-            method: 'POST'
+            method: 'PUT'
         });
     }
 

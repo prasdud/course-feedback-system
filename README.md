@@ -23,8 +23,8 @@ Before you begin, ensure you have the following installed:
 ### 1. Clone the Repository
 
 ```bash
-git clone <your-repository-url>
-cd course-feedback-project
+git clone https://github.com/prasdud/course-feedback-system/
+cd course-feedback-system
 ```
 
 ### 2. Backend Setup

@@ -1,111 +1,169 @@
-const API_BASE = "http://127.0.0.1:8000";
+const API_BASE = 'http://127.0.0.1:8000';
 
-// Helper to get JWT token from localStorage
-function getToken() {
-  return localStorage.getItem("token");
-}
-
-// Generic GET request
-async function getRequest(url) {
-  const res = await fetch(`${API_BASE}${url}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${getToken()}`
+class ApiClient {
+    constructor() {
+        this.token = localStorage.getItem('token');
+        this.userRole = localStorage.getItem('userRole');
     }
-  });
-  return res.json();
+
+    getHeaders() {
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+        
+        if (this.token) {
+            headers['Authorization'] = `Bearer ${this.token}`;
+        }
+        
+        return headers;
+    }
+
+    async request(endpoint, options = {}) {
+        const url = `${API_BASE}${endpoint}`;
+        const config = {
+            headers: this.getHeaders(),
+            ...options
+        };
+
+        try {
+            const response = await fetch(url, config);
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || data.error || 'Request failed');
+            }
+
+            return data;
+        } catch (error) {
+            console.error('API Error:', error);
+            throw error;
+        }
+    }
+
+    // Auth endpoints
+    async register(userData) {
+        return this.request('/auth/register/', {
+            method: 'POST',
+            body: JSON.stringify(userData)
+        });
+    }
+
+    async login(credentials) {
+        return this.request('/auth/login/', {
+            method: 'POST',
+            body: JSON.stringify(credentials)
+        });
+    }
+
+    async getProfile() {
+        return this.request('/auth/profile');
+    }
+
+    async updateProfile(profileData) {
+        return this.request('/auth/profile/update/', {
+            method: 'PUT',
+            body: JSON.stringify(profileData)
+        });
+    }
+
+    async changePassword(passwordData) {
+        return this.request('/auth/profile/change-password/', {
+            method: 'PUT',
+            body: JSON.stringify(passwordData)
+        });
+    }
+
+    // Course endpoints
+    async createCourse(courseData) {
+        return this.request('/api/courses/create/', {
+            method: 'POST',
+            body: JSON.stringify(courseData)
+        });
+    }
+
+    async getCourses() {
+        return this.request('/api/courses/');
+    }
+
+    // Feedback endpoints
+    async submitFeedback(feedbackData) {
+        return this.request('/api/feedback/submit/', {
+            method: 'POST',
+            body: JSON.stringify(feedbackData)
+        });
+    }
+
+    // Admin endpoints
+    async getAdminFeedback() {
+        return this.request('/api/admin/feedback/');
+    }
+
+    async exportFeedback() {
+        const response = await fetch(`${API_BASE}/api/admin/feedback/export`, {
+            headers: this.getHeaders()
+        });
+        return response.blob();
+    }
+
+    async getMetrics() {
+        return this.request('/api/metrics/');
+    }
+
+    async getStudents() {
+        return this.request('/api/students/');
+    }
+
+    async blockStudent(studentId) {
+        return this.request(`/api/students/${studentId}/block/`, {
+            method: 'POST'
+        });
+    }
+
+    async unblockStudent(studentId) {
+        return this.request(`/api/students/${studentId}/unblock/`, {
+            method: 'POST'
+        });
+    }
+
+    async deleteStudent(studentId) {
+        return this.request(`/api/students/${studentId}/delete/`, {
+            method: 'DELETE'
+        });
+    }
+
+    async getFeedbackTrends() {
+        return this.request('/api/feedback-trends/');
+    }
+
+    // Helper methods
+    setToken(token) {
+        this.token = token;
+        localStorage.setItem('token', token);
+    }
+
+    setUserRole(role) {
+        this.userRole = role;
+        localStorage.setItem('userRole', role);
+    }
+
+    clearAuth() {
+        this.token = null;
+        this.userRole = null;
+        localStorage.removeItem('token');
+        localStorage.removeItem('userRole');
+    }
+
+  isAuthenticated() {
+      return !!localStorage.getItem('token');
+  }
+
+  isAdmin() {
+      return localStorage.getItem('userRole') === 'admin';
+  }
+
+  isStudent() {
+      return localStorage.getItem('userRole') === 'student';
+  }
 }
 
-// Generic POST request
-async function postRequest(url, data) {
-  const res = await fetch(`${API_BASE}${url}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${getToken()}`
-    },
-    body: JSON.stringify(data)
-  });
-  return res.json();
-}
-
-// =======================
-// Auth Endpoints
-// =======================
-export async function registerUser(name, email, password) {
-  return await fetch(`${API_BASE}/auth/register/`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, email, password })
-  }).then(res => res.json());
-}
-
-export async function loginUser(email, password) {
-  return await fetch(`${API_BASE}/auth/login/`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password })
-  }).then(res => res.json());
-}
-
-export async function getProfile() {
-  return await getRequest("/auth/profile");
-}
-
-export async function updateProfile(data) {
-  return await postRequest("/auth/profile/update", data);
-}
-
-export async function changePassword(data) {
-  return await postRequest("/auth/profile/change-password/", data);
-}
-
-// =======================
-// Courses
-// =======================
-export async function getCourses() {
-  return await getRequest("/api/courses/");
-}
-
-export async function createCourse(name, description) {
-  return await postRequest("/api/courses/create/", { name, description });
-}
-
-// =======================
-// Feedback
-// =======================
-export async function submitFeedback(courseId, rating, message) {
-  return await postRequest("/api/feedback/submit/", { course: courseId, rating, message });
-}
-
-export async function getAdminFeedback() {
-  return await getRequest("/api/admin/feedback/");
-}
-
-export async function exportFeedbackCSV() {
-  return await getRequest("/api/admin/feedback/export");
-}
-
-export async function getFeedbackTrends() {
-  return await getRequest("/api/feedback-trends/");
-}
-
-// =======================
-// Students (Admin)
-// =======================
-export async function getStudents() {
-  return await getRequest("/api/students/");
-}
-
-export async function blockStudent(studentId) {
-  return await getRequest(`/api/students/${studentId}/block/`);
-}
-
-export async function unblockStudent(studentId) {
-  return await getRequest(`/api/students/${studentId}/unblock/`);
-}
-
-export async function deleteStudent(studentId) {
-  return await getRequest(`/api/students/${studentId}/delete/`);
-}
+const api = new ApiClient();

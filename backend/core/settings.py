@@ -34,11 +34,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 FRONTEND_DIR = os.path.join(BASE_DIR, '..', 'frontend')
 
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 STATICFILES_DIRS = [
-    os.path.join(settings.FRONTEND_DIR, 'css'),
-    os.path.join(settings.FRONTEND_DIR, 'js'),
-    os.path.join(settings.FRONTEND_DIR, 'assets'),
+    os.path.join(FRONTEND_DIR, 'css'),
+    os.path.join(FRONTEND_DIR, 'js'),
+    os.path.join(FRONTEND_DIR, 'assets'),
 ]
+
 
 
 # Quick-start development settings - unsuitable for production
@@ -166,8 +170,6 @@ CORS_ALLOW_ALL_ORIGINS = True  # (for dev only)
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
-STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field

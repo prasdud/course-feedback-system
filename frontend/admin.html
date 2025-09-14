@@ -1,254 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background: #f0f2f5;
-    }
-    nav {
-      background: #0ABAB5;
-      color: #fff;
-      padding: 1rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    nav h1 {
-      margin: 0;
-    }
-    nav button {
-      padding: 8px 12px;
-      background: #fff;
-      color: #0ABAB5;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    nav button:hover {
-      background: #e1e1e1;
-    }
-    .container {
-      max-width: 1000px;
-      margin: 20px auto;
-      background: #fff;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
-    }
-    h2 {
-      margin-top: 0;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 10px;
-    }
-    th, td {
-      padding: 10px;
-      border-bottom: 1px solid #ddd;
-      text-align: left;
-    }
-    th {
-      background: #0ABAB5;
-      color: #fff;
-    }
-    button.action-btn {
-      padding: 5px 10px;
-      margin-right: 5px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      color: #fff;
-    }
-    button.block { background: #e74c3c; }
-    button.unblock { background: #27ae60; }
-    button.delete { background: #95a5a6; }
-    button.add-course { background: #0ABAB5; margin-top: 10px; }
-    input, select {
-      padding: 6px;
-      margin-right: 10px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Student Feedback System</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <div class="container">
+        <div class="dashboard">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h1>Admin Dashboard</h1>
+                <div>
+                    <a href="profile.html" style="margin-right: 1rem; color: #667eea;">Profile</a>
+                    <button onclick="logout()" style="width: auto; padding: 0.5rem 1rem;">Logout</button>
+                </div>
+            </div>
 
-<nav>
-  <h1>Admin Dashboard</h1>
-  <div>
-    <span id="admin-name"></span>
-    <button id="logout-btn">Logout</button>
-  </div>
-</nav>
+            <div class="nav-links">
+                <a href="#" onclick="showSection('metrics')">Metrics</a>
+                <a href="#" onclick="showSection('feedback')">All Feedback</a>
+                <a href="#" onclick="showSection('students')">Students</a>
+                <a href="#" onclick="showSection('courses')">Courses</a>
+            </div>
 
-<div class="container" id="metrics">
-  <h2>Metrics</h2>
-  <p>Total Feedbacks: <span id="total-feedbacks">0</span></p>
-  <p>Total Students: <span id="total-students">0</span></p>
-</div>
+            <!-- Metrics Section -->
+            <div id="metricsSection" class="section active">
+                <h2>System Metrics</h2>
+                <div id="metricsLoading" class="loading">Loading metrics...</div>
+                <div id="metricsContent" style="display: none;">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3 id="totalStudents">0</h3>
+                            <p>Total Students</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="totalCourses">0</h3>
+                            <p>Total Courses</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="totalFeedback">0</h3>
+                            <p>Total Feedback</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="avgRating">0.0</h3>
+                            <p>Average Rating</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-<div class="container" id="students-section">
-  <h2>Students Management</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Email</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody id="students-list"></tbody>
-  </table>
-</div>
+            <!-- Feedback Section -->
+            <div id="feedbackSection" class="section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h2>All Feedback</h2>
+                    <button onclick="exportFeedback()" style="width: auto; padding: 0.5rem 1rem;">Export CSV</button>
+                </div>
+                <div id="feedbackLoading" class="loading" style="display: none;">Loading feedback...</div>
+                <div id="feedbackList" class="feedback-list"></div>
+            </div>
 
-<div class="container" id="feedback-section">
-  <h2>Feedbacks</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Student</th>
-        <th>Course</th>
-        <th>Rating</th>
-        <th>Message</th>
-      </tr>
-    </thead>
-    <tbody id="feedback-list"></tbody>
-  </table>
-</div>
+            <!-- Students Section -->
+            <div id="studentsSection" class="section">
+                <h2>Students Management</h2>
+                <div id="studentsLoading" class="loading" style="display: none;">Loading students...</div>
+                <div id="studentsTable" class="table-container"></div>
+            </div>
 
-<div class="container" id="courses-section">
-  <h2>Courses Management</h2>
-  <input type="text" id="course-name" placeholder="Course Name">
-  <input type="text" id="course-desc" placeholder="Description">
-  <button class="add-course" id="add-course-btn">Add Course</button>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Description</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody id="courses-list"></tbody>
-  </table>
-</div>
+            <!-- Courses Section -->
+            <div id="coursesSection" class="section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h2>Courses</h2>
+                    <button onclick="showAddCourseForm()" style="width: auto; padding: 0.5rem 1rem;">Add Course</button>
+                </div>
+                
+                <!-- Add Course Form -->
+                <div id="addCourseForm" style="display: none; margin-bottom: 2rem; padding: 1rem; background: #f8f9fa; border-radius: 5px;">
+                    <h3>Add New Course</h3>
+                    <form id="courseForm">
+                        <div class="form-group">
+                            <label for="courseName">Course Name:</label>
+                            <input type="text" id="courseName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="courseDescription">Description:</label>
+                            <textarea id="courseDescription" rows="3" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 5px;"></textarea>
+                        </div>
+                        <div style="display: flex; gap: 1rem;">
+                            <button type="submit" style="width: auto; padding: 0.5rem 1rem;">Add Course</button>
+                            <button type="button" onclick="hideAddCourseForm()" style="width: auto; padding: 0.5rem 1rem; background: #6c757d;">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div id="coursesLoading" class="loading" style="display: none;">Loading courses...</div>
+                <div id="coursesList"></div>
+            </div>
+        </div>
+        
+        <div id="message" class="message"></div>
+    </div>
 
-<script type="module">
-  import { getMetrics, getAllStudents, blockStudent, unblockStudent, deleteStudent, getAllFeedbacks, getCourses, createCourse, deleteCourse } from './api.js';
-
-  const adminName = document.getElementById('admin-name');
-  const logoutBtn = document.getElementById('logout-btn');
-  const totalFeedbacks = document.getElementById('total-feedbacks');
-  const totalStudents = document.getElementById('total-students');
-  const studentsList = document.getElementById('students-list');
-  const feedbackList = document.getElementById('feedback-list');
-  const coursesList = document.getElementById('courses-list');
-
-  const courseNameInput = document.getElementById('course-name');
-  const courseDescInput = document.getElementById('course-desc');
-  const addCourseBtn = document.getElementById('add-course-btn');
-
-  const user = JSON.parse(localStorage.getItem('user'));
-  const token = localStorage.getItem('token');
-
-  if (!token || user.role !== 'admin') {
-    window.location.href = "index.html";
-  } else {
-    adminName.textContent = user.name;
-  }
-
-  logoutBtn.addEventListener('click', () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.href = "index.html";
-  });
-
-  async function loadMetrics() {
-    const metrics = await getMetrics();
-    totalFeedbacks.textContent = metrics.feedbackCount || 0;
-    totalStudents.textContent = metrics.studentCount || 0;
-  }
-
-  async function loadStudents() {
-    const students = await getAllStudents();
-    studentsList.innerHTML = '';
-    students.forEach(s => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${s.name}</td>
-        <td>${s.email}</td>
-        <td>
-          ${s.blocked ? 
-            `<button class="action-btn unblock">Unblock</button>` : 
-            `<button class="action-btn block">Block</button>`}
-          <button class="action-btn delete">Delete</button>
-        </td>`;
-      studentsList.appendChild(tr);
-
-      const blockBtn = tr.querySelector('.block');
-      const unblockBtn = tr.querySelector('.unblock');
-      const deleteBtn = tr.querySelector('.delete');
-
-      if(blockBtn) blockBtn.onclick = async () => { await blockStudent(s._id); loadStudents(); }
-      if(unblockBtn) unblockBtn.onclick = async () => { await unblockStudent(s._id); loadStudents(); }
-      if(deleteBtn) deleteBtn.onclick = async () => { await deleteStudent(s._id); loadStudents(); }
-    });
-  }
-
-  async function loadFeedbacks() {
-    const feedbacks = await getAllFeedbacks();
-    feedbackList.innerHTML = '';
-    feedbacks.forEach(fb => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${fb.student_name || fb.student?.name}</td>
-        <td>${fb.course_name || fb.course?.name}</td>
-        <td>${fb.rating}</td>
-        <td>${fb.message}</td>
-      `;
-      feedbackList.appendChild(tr);
-    });
-  }
-
-  async function loadCourses() {
-    const courses = await getCourses();
-    coursesList.innerHTML = '';
-    courses.forEach(c => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${c.name}</td>
-        <td>${c.description}</td>
-        <td>
-          <button class="action-btn delete">Delete</button>
-        </td>`;
-      coursesList.appendChild(tr);
-
-      const deleteBtn = tr.querySelector('.delete');
-      deleteBtn.onclick = async () => { await deleteCourse(c._id); loadCourses(); }
-    });
-  }
-
-  addCourseBtn.addEventListener('click', async () => {
-    const name = courseNameInput.value.trim();
-    const desc = courseDescInput.value.trim();
-    if (!name) return alert("Course name required");
-    await createCourse({ name, description: desc });
-    courseNameInput.value = '';
-    courseDescInput.value = '';
-    loadCourses();
-  });
-
-  loadMetrics();
-  loadStudents();
-  loadFeedbacks();
-  loadCourses();
-
-</script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/admin.js"></script>
 </body>
 </html>

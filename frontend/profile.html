@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Student Feedback System</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="dashboard">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h1>My Profile</h1>
+                <div>
+                    <a href="#" onclick="goBack()" style="margin-right: 1rem; color: #667eea;">Back to Dashboard</a>
+                    <button onclick="logout()" style="width: auto; padding: 0.5rem 1rem;">Logout</button>
+                </div>
+            </div>
+
+            <!-- Profile Information -->
+            <div class="feedback-list" style="margin-bottom: 2rem;">
+                <h2>Profile Information</h2>
+                <div id="profileLoading" class="loading">Loading profile...</div>
+                <div id="profileInfo" style="display: none;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                        <div>
+                            <strong>Name:</strong>
+                            <p id="profileName">-</p>
+                        </div>
+                        <div>
+                            <strong>Email:</strong>
+                            <p id="profileEmail">-</p>
+                        </div>
+                        <div>
+                            <strong>Role:</strong>
+                            <p id="profileRole">-</p>
+                        </div>
+                        <div>
+                            <strong>Member Since:</strong>
+                            <p id="profileJoined">-</p>
+                        </div>
+                    </div>
+                    <button onclick="showUpdateForm()" style="width: auto; padding: 0.5rem 1rem;">Edit Profile</button>
+                </div>
+            </div>
+
+            <!-- Update Profile Form -->
+            <div id="updateProfileSection" class="feedback-list" style="display: none; margin-bottom: 2rem;">
+                <h2>Update Profile</h2>
+                <form id="updateProfileForm">
+                    <div class="form-group">
+                        <label for="updateName">Name:</label>
+                        <input type="text" id="updateName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="updateEmail">Email:</label>
+                        <input type="email" id="updateEmail" required>
+                    </div>
+                    <div style="display: flex; gap: 1rem;">
+                        <button type="submit" style="width: auto; padding: 0.5rem 1rem;">Update Profile</button>
+                        <button type="button" onclick="cancelUpdate()" style="width: auto; padding: 0.5rem 1rem; background: #6c757d;">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Change Password -->
+            <div class="feedback-list">
+                <h2>Change Password</h2>
+                <form id="changePasswordForm">
+                    <div class="form-group">
+                        <label for="currentPassword">Current Password:</label>
+                        <input type="password" id="currentPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newPassword">New Password:</label>
+                        <input type="password" id="newPassword" required>
+                    </div>
+                    <button type="submit" style="width: auto; padding: 0.5rem 1rem;">Change Password</button>
+                </form>
+            </div>
+        </div>
+        
+        <div id="message" class="message"></div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/profile.js"></script>
+</body>
+</html>

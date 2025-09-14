@@ -1,187 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Course Feedback - Dashboard</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f0f2f5;
-      margin: 0;
-      padding: 0;
-    }
-    nav {
-      background: #0ABAB5;
-      color: #fff;
-      padding: 1rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    nav h1 {
-      margin: 0;
-    }
-    nav button {
-      padding: 8px 12px;
-      background: #fff;
-      color: #0ABAB5;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    nav button:hover {
-      background: #e1e1e1;
-    }
-    .container {
-      max-width: 800px;
-      margin: 30px auto;
-      background: #fff;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    }
-    h2 {
-      margin-top: 0;
-    }
-    input, select, textarea {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 16px;
-    }
-    button.submit-btn {
-      background: #0ABAB5;
-      color: #fff;
-      border: none;
-      padding: 12px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-    button.submit-btn:hover {
-      background: #089694;
-    }
-    .feedback-item {
-      border-bottom: 1px solid #ddd;
-      padding: 10px 0;
-    }
-    .feedback-item:last-child {
-      border-bottom: none;
-    }
-    .feedback-item strong {
-      display: inline-block;
-      width: 100px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Feedback - Student Feedback System</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <div class="container">
+        <div class="dashboard">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h1>Student Dashboard</h1>
+                <div>
+                    <a href="profile.html" style="margin-right: 1rem; color: #667eea;">Profile</a>
+                    <button onclick="logout()" style="width: auto; padding: 0.5rem 1rem;">Logout</button>
+                </div>
+            </div>
 
-<nav>
-  <h1>Course Feedback</h1>
-  <div>
-    <span id="username"></span>
-    <button id="logout-btn">Logout</button>
-  </div>
-</nav>
+            <!-- Submit Feedback Section -->
+            <div class="feedback-list" style="margin-bottom: 2rem;">
+                <h2>Submit Feedback</h2>
+                <form id="feedbackForm">
+                    <div class="form-group">
+                        <label for="courseSelect">Select Course:</label>
+                        <select id="courseSelect" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 5px;" required>
+                            <option value="">Loading courses...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="rating">Rating:</label>
+                        <div class="rating-stars" style="display: flex; gap: 0.5rem; margin: 0.5rem 0;">
+                            <span class="star" data-rating="1">☆</span>
+                            <span class="star" data-rating="2">☆</span>
+                            <span class="star" data-rating="3">☆</span>
+                            <span class="star" data-rating="4">☆</span>
+                            <span class="star" data-rating="5">☆</span>
+                        </div>
+                        <input type="hidden" id="rating" name="rating" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="message">Your Feedback:</label>
+                        <textarea id="message" rows="4" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 5px; resize: vertical;" placeholder="Share your thoughts about the course..." required></textarea>
+                    </div>
+                    
+                    <button type="submit">Submit Feedback</button>
+                </form>
+            </div>
 
-<div class="container">
-  <h2>Submit Feedback</h2>
-  <select id="course-select">
-    <option value="">Select a course</option>
-  </select>
-  <input type="number" id="rating" placeholder="Rating (1-5)" min="1" max="5">
-  <textarea id="message" rows="3" placeholder="Your feedback"></textarea>
-  <button class="submit-btn" id="submit-feedback">Submit</button>
-</div>
+            <!-- My Feedback Section -->
+            <div class="feedback-list">
+                <h2>My Previous Feedback</h2>
+                <div id="myFeedbackLoading" class="loading">Loading your feedback...</div>
+                <div id="myFeedbackList"></div>
+            </div>
+        </div>
+        
+        <div id="message" class="message"></div>
+    </div>
 
-<div class="container">
-  <h2>Your Feedbacks</h2>
-  <div id="feedback-list"></div>
-</div>
-
-<script type="module">
-  import { getCourses, submitFeedback, getStudentFeedback } from './api.js';
-
-  const usernameSpan = document.getElementById('username');
-  const logoutBtn = document.getElementById('logout-btn');
-  const courseSelect = document.getElementById('course-select');
-  const ratingInput = document.getElementById('rating');
-  const messageInput = document.getElementById('message');
-  const submitBtn = document.getElementById('submit-feedback');
-  const feedbackList = document.getElementById('feedback-list');
-
-  const user = JSON.parse(localStorage.getItem('user'));
-  const token = localStorage.getItem('token');
-
-  if (!token) {
-    window.location.href = "index.html";
-  } else {
-    usernameSpan.textContent = user.name;
-  }
-
-  logoutBtn.addEventListener('click', () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.href = "index.html";
-  });
-
-  async function loadCourses() {
-    const courses = await getCourses();
-    courses.forEach(course => {
-      const option = document.createElement('option');
-      option.value = course._id || course.id || course.id; // depending on backend
-      option.textContent = course.name;
-      courseSelect.appendChild(option);
-    });
-  }
-
-  async function loadFeedbacks() {
-    const feedbacks = await getStudentFeedback();
-    feedbackList.innerHTML = '';
-    if (feedbacks.length === 0) {
-      feedbackList.textContent = "No feedback submitted yet.";
-    } else {
-      feedbacks.forEach(fb => {
-        const div = document.createElement('div');
-        div.className = 'feedback-item';
-        div.innerHTML = `<strong>Course:</strong> ${fb.course_name || fb.course?.name} <br>
-                         <strong>Rating:</strong> ${fb.rating} <br>
-                         <strong>Message:</strong> ${fb.message}`;
-        feedbackList.appendChild(div);
-      });
-    }
-  }
-
-  submitBtn.addEventListener('click', async () => {
-    const course = courseSelect.value;
-    const rating = ratingInput.value;
-    const message = messageInput.value.trim();
-
-    if (!course || !rating || !message) {
-      alert("Please fill all fields.");
-      return;
-    }
-
-    try {
-      await submitFeedback({ course, rating, message });
-      alert("Feedback submitted!");
-      ratingInput.value = '';
-      messageInput.value = '';
-      courseSelect.value = '';
-      loadFeedbacks();
-    } catch (err) {
-      console.error(err);
-      alert("Error submitting feedback.");
-    }
-  });
-
-  loadCourses();
-  loadFeedbacks();
-</script>
-
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/feedback.js"></script>
 </body>
 </html>

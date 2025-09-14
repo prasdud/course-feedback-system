@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Course Feedback - Login/Register</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      width: 400px;
+      padding: 30px;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #0ABAB5;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #089694;
+    }
+    .switch {
+      text-align: center;
+      margin-top: 15px;
+      color: #666;
+      cursor: pointer;
+    }
+    .switch span {
+      color: #0ABAB5;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2 id="form-title">Login</h2>
+
+  <div id="name-field" style="display: none;">
+    <input type="text" id="name" placeholder="Full Name">
+  </div>
+
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Password">
+  <button id="submit-btn">Login</button>
+
+  <div class="switch" id="switch-form">
+    Don't have an account? <span id="switch-text">Register</span>
+  </div>
+</div>
+
+<script type="module">
+  import { registerUser, loginUser } from './api.js';
+
+  const formTitle = document.getElementById('form-title');
+  const nameField = document.getElementById('name-field');
+  const nameInput = document.getElementById('name');
+  const emailInput = document.getElementById('email');
+  const passwordInput = document.getElementById('password');
+  const submitBtn = document.getElementById('submit-btn');
+  const switchForm = document.getElementById('switch-form');
+  const switchText = document.getElementById('switch-text');
+
+  let isRegister = false;
+
+  function toggleForm() {
+    isRegister = !isRegister;
+    if (isRegister) {
+      formTitle.textContent = "Register";
+      nameField.style.display = "block";
+      submitBtn.textContent = "Register";
+      switchText.textContent = "Login";
+    } else {
+      formTitle.textContent = "Login";
+      nameField.style.display = "none";
+      submitBtn.textContent = "Login";
+      switchText.textContent = "Register";
+    }
+  }
+
+  switchForm.addEventListener('click', toggleForm);
+
+  submitBtn.addEventListener('click', async () => {
+    const name = nameInput.value.trim();
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+
+    if (!email || !password || (isRegister && !name)) {
+      alert("Please fill all required fields.");
+      return;
+    }
+
+    try {
+      if (isRegister) {
+        const res = await registerUser(name, email, password);
+        if (res.token) {
+          localStorage.setItem('token', res.token);
+          localStorage.setItem('user', JSON.stringify(res.user));
+          alert("Registration successful!");
+          window.location.href = "feedback.html";
+        } else {
+          alert(res.error || "Registration failed.");
+        }
+      } else {
+        const res = await loginUser(email, password);
+        if (res.token) {
+          localStorage.setItem('token', res.token);
+          localStorage.setItem('user', JSON.stringify(res.user));
+          alert("Login successful!");
+          window.location.href = "feedback.html";
+        } else {
+          alert(res.error || "Login failed.");
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong. Check console.");
+    }
+  });
+
+  // Auto-redirect if already logged in
+  const token = localStorage.getItem('token');
+  if (token) {
+    window.location.href = "feedback.html";
+  }
+</script>
+
+</body>
+</html>

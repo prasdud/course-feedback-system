@@ -39,6 +39,19 @@
                             <strong>Member Since:</strong>
                             <p id="profileJoined">-</p>
                         </div>
+                        <div>
+                            <strong>Phone:</strong>
+                            <p id="profilePhone">-</p>
+                        </div>
+                        <div>
+                            <strong>Date of Birth:</strong>
+                            <p id="profileDob">-</p>
+                        </div>
+                        <div>
+                            <strong>Address:</strong>
+                            <p id="profileAddress">-</p>
+                        </div>
+
                     </div>
                     <button onclick="showUpdateForm()" style="width: auto; padding: 0.5rem 1rem;">Edit Profile</button>
                 </div>
@@ -52,16 +65,34 @@
                         <label for="updateName">Name:</label>
                         <input type="text" id="updateName" required>
                     </div>
+
                     <div class="form-group">
-                        <label for="updateEmail">Email:</label>
-                        <input type="email" id="updateEmail" required>
+                        <label for="updateEmail">Email (read-only):</label>
+                        <input type="email" id="updateEmail" readonly>
                     </div>
+
+                    <div class="form-group">
+                        <label for="updatePhone">Phone:</label>
+                        <input type="text" id="updatePhone" placeholder="Enter phone number">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="updateDob">Date of Birth:</label>
+                        <input type="date" id="updateDob">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="updateAddress">Address:</label>
+                        <textarea id="updateAddress" rows="2" placeholder="Enter address"></textarea>
+                    </div>
+
                     <div style="display: flex; gap: 1rem;">
                         <button type="submit" style="width: auto; padding: 0.5rem 1rem;">Update Profile</button>
                         <button type="button" onclick="cancelUpdate()" style="width: auto; padding: 0.5rem 1rem; background: #6c757d;">Cancel</button>
                     </div>
                 </form>
             </div>
+
 
             <!-- Change Password -->
             <div class="feedback-list">

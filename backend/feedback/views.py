@@ -33,6 +33,20 @@ def list_courses(request):
     serializer = CourseSerializer(courses, many=True)
     return Response({"courses": serializer.data})
 
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+def get_course(request, course_id):
+    if request.user.role != 'admin':
+        return Response({"error": "Admin access required"}, status=403)
+
+    try:
+        course = Course.objects.get(id=course_id)
+    except Course.DoesNotExist:
+        return Response({"error": "Course not found"}, status=404)
+
+    serializer = CourseSerializer(course)
+    return Response(serializer.data)
+
 
 @api_view(['PUT'])
 @authentication_classes([JWTAuthentication])

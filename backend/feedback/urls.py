@@ -7,6 +7,7 @@ urlpatterns = [
     path('courses/create/', views.create_course, name='create_course'),
     path('courses/<str:course_id>/edit/', views.edit_course, name='edit_course'),
     path('courses/<str:course_id>/delete/', views.delete_course, name='delete_course'),
+    path('courses/<str:course_id>/', views.get_course, name='get_course'),       # <-- single course
 
     # Feedback (Student)
     path('feedback/', views.list_feedback, name='list_feedback'),

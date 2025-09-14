@@ -23,8 +23,8 @@ Before you begin, ensure you have the following installed:
 ### 1. Clone the Repository
 
 ```bash
-git clone <your-repository-url>
-cd course-feedback-project
+git clone https://github.com/prasdud/course-feedback-system/
+cd course-feedback-system
 ```
 
 ### 2. Backend Setup
@@ -37,10 +37,6 @@ cd backend/
 
 Create and activate a virtual environment:
 
-```bash
-# For Windows
-python -m venv venv
-venv\Scripts\activate
 
 # For macOS/Linux
 python3 -m venv venv
@@ -59,11 +55,11 @@ Create a `.env` file in the backend directory with the following configuration:
 
 ```env
 DEBUG=False
-SECRET_KEY=django-insecure-f97gx3wq)%s=af-0*=jx6*8x*2=8w%bwfer1-ev9b)8lf9ga$@
-DB_URI=mongodb+srv://admin:password314159@feedback-system.mk5rxaj.mongodb.net/?retryWrites=true&w=majority&appName=feedback-system
-CLOUDINARY_CLOUD_NAME=dl1j5hfhv
-CLOUDINARY_API_KEY=441134613823658
-CLOUDINARY_API_SECRET=7MtuE5EHJj_JBIpBqO9JaMy3kB0
+SECRET_KEY=DJANGO-SECRET-KEY
+DB_URI=DJANGO-ATLAS-URI
+CLOUDINARY_CLOUD_NAME=CLOUDINARY-CLOUD-NAME
+CLOUDINARY_API_KEY=CLOUDINARY-API-KEY
+CLOUDINARY_API_SECRET=CLOUDINARY-API-SECRET
 ```
 
 ### 4. Setting Up External Services

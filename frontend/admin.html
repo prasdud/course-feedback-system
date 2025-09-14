@@ -75,23 +75,19 @@
                 </div>
                 
                 <!-- Add Course Form -->
-                <div id="addCourseForm" style="display: none; margin-bottom: 2rem; padding: 1rem; background: #f8f9fa; border-radius: 5px;">
-                    <h3>Add New Course</h3>
-                    <form id="courseForm">
-                        <div class="form-group">
-                            <label for="courseName">Course Name:</label>
-                            <input type="text" id="courseName" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="courseDescription">Description:</label>
-                            <textarea id="courseDescription" rows="3" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 5px;"></textarea>
-                        </div>
-                        <div style="display: flex; gap: 1rem;">
-                            <button type="submit" style="width: auto; padding: 0.5rem 1rem;">Add Course</button>
-                            <button type="button" onclick="hideAddCourseForm()" style="width: auto; padding: 0.5rem 1rem; background: #6c757d;">Cancel</button>
-                        </div>
-                    </form>
-                </div>
+                <form id="addCourseForm">
+                    <input type="text" id="addCourseName" placeholder="Course Name" required>
+                    <textarea id="addCourseDescription" placeholder="Course Description"></textarea>
+                    <button type="submit">Add Course</button>
+                </form>
+
+                <!-- Edit Course Form -->
+                <form id="editCourseForm" style="display:none;">
+                    <input type="text" id="editCourseName" placeholder="Course Name" required>
+                    <textarea id="editCourseDescription" placeholder="Course Description"></textarea>
+                    <button type="submit">Update Course</button>
+                </form>
+
                 
                 <div id="coursesLoading" class="loading" style="display: none;">Loading courses...</div>
                 <div id="coursesList"></div>

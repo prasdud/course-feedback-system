@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f0f2f5;
+    }
+    nav {
+      background: #0ABAB5;
+      color: #fff;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    nav h1 {
+      margin: 0;
+    }
+    nav button {
+      padding: 8px 12px;
+      background: #fff;
+      color: #0ABAB5;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    nav button:hover {
+      background: #e1e1e1;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 20px auto;
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    h2 {
+      margin-top: 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 10px;
+    }
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      background: #0ABAB5;
+      color: #fff;
+    }
+    button.action-btn {
+      padding: 5px 10px;
+      margin-right: 5px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      color: #fff;
+    }
+    button.block { background: #e74c3c; }
+    button.unblock { background: #27ae60; }
+    button.delete { background: #95a5a6; }
+    button.add-course { background: #0ABAB5; margin-top: 10px; }
+    input, select {
+      padding: 6px;
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <h1>Admin Dashboard</h1>
+  <div>
+    <span id="admin-name"></span>
+    <button id="logout-btn">Logout</button>
+  </div>
+</nav>
+
+<div class="container" id="metrics">
+  <h2>Metrics</h2>
+  <p>Total Feedbacks: <span id="total-feedbacks">0</span></p>
+  <p>Total Students: <span id="total-students">0</span></p>
+</div>
+
+<div class="container" id="students-section">
+  <h2>Students Management</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="students-list"></tbody>
+  </table>
+</div>
+
+<div class="container" id="feedback-section">
+  <h2>Feedbacks</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Student</th>
+        <th>Course</th>
+        <th>Rating</th>
+        <th>Message</th>
+      </tr>
+    </thead>
+    <tbody id="feedback-list"></tbody>
+  </table>
+</div>
+
+<div class="container" id="courses-section">
+  <h2>Courses Management</h2>
+  <input type="text" id="course-name" placeholder="Course Name">
+  <input type="text" id="course-desc" placeholder="Description">
+  <button class="add-course" id="add-course-btn">Add Course</button>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="courses-list"></tbody>
+  </table>
+</div>
+
+<script type="module">
+  import { getMetrics, getAllStudents, blockStudent, unblockStudent, deleteStudent, getAllFeedbacks, getCourses, createCourse, deleteCourse } from './api.js';
+
+  const adminName = document.getElementById('admin-name');
+  const logoutBtn = document.getElementById('logout-btn');
+  const totalFeedbacks = document.getElementById('total-feedbacks');
+  const totalStudents = document.getElementById('total-students');
+  const studentsList = document.getElementById('students-list');
+  const feedbackList = document.getElementById('feedback-list');
+  const coursesList = document.getElementById('courses-list');
+
+  const courseNameInput = document.getElementById('course-name');
+  const courseDescInput = document.getElementById('course-desc');
+  const addCourseBtn = document.getElementById('add-course-btn');
+
+  const user = JSON.parse(localStorage.getItem('user'));
+  const token = localStorage.getItem('token');
+
+  if (!token || user.role !== 'admin') {
+    window.location.href = "index.html";
+  } else {
+    adminName.textContent = user.name;
+  }
+
+  logoutBtn.addEventListener('click', () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = "index.html";
+  });
+
+  async function loadMetrics() {
+    const metrics = await getMetrics();
+    totalFeedbacks.textContent = metrics.feedbackCount || 0;
+    totalStudents.textContent = metrics.studentCount || 0;
+  }
+
+  async function loadStudents() {
+    const students = await getAllStudents();
+    studentsList.innerHTML = '';
+    students.forEach(s => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${s.name}</td>
+        <td>${s.email}</td>
+        <td>
+          ${s.blocked ? 
+            `<button class="action-btn unblock">Unblock</button>` : 
+            `<button class="action-btn block">Block</button>`}
+          <button class="action-btn delete">Delete</button>
+        </td>`;
+      studentsList.appendChild(tr);
+
+      const blockBtn = tr.querySelector('.block');
+      const unblockBtn = tr.querySelector('.unblock');
+      const deleteBtn = tr.querySelector('.delete');
+
+      if(blockBtn) blockBtn.onclick = async () => { await blockStudent(s._id); loadStudents(); }
+      if(unblockBtn) unblockBtn.onclick = async () => { await unblockStudent(s._id); loadStudents(); }
+      if(deleteBtn) deleteBtn.onclick = async () => { await deleteStudent(s._id); loadStudents(); }
+    });
+  }
+
+  async function loadFeedbacks() {
+    const feedbacks = await getAllFeedbacks();
+    feedbackList.innerHTML = '';
+    feedbacks.forEach(fb => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${fb.student_name || fb.student?.name}</td>
+        <td>${fb.course_name || fb.course?.name}</td>
+        <td>${fb.rating}</td>
+        <td>${fb.message}</td>
+      `;
+      feedbackList.appendChild(tr);
+    });
+  }
+
+  async function loadCourses() {
+    const courses = await getCourses();
+    coursesList.innerHTML = '';
+    courses.forEach(c => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${c.name}</td>
+        <td>${c.description}</td>
+        <td>
+          <button class="action-btn delete">Delete</button>
+        </td>`;
+      coursesList.appendChild(tr);
+
+      const deleteBtn = tr.querySelector('.delete');
+      deleteBtn.onclick = async () => { await deleteCourse(c._id); loadCourses(); }
+    });
+  }
+
+  addCourseBtn.addEventListener('click', async () => {
+    const name = courseNameInput.value.trim();
+    const desc = courseDescInput.value.trim();
+    if (!name) return alert("Course name required");
+    await createCourse({ name, description: desc });
+    courseNameInput.value = '';
+    courseDescInput.value = '';
+    loadCourses();
+  });
+
+  loadMetrics();
+  loadStudents();
+  loadFeedbacks();
+  loadCourses();
+
+</script>
+</body>
+</html>

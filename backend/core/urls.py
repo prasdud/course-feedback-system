@@ -15,8 +15,17 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+import os
+from django.views.static import serve
+from django.conf import settings
+
+def serve_frontend(request, filename='index.html'):
+    path_to_file = os.path.join(settings.BASE_DIR, 'frontend', filename)
+    return serve(request, os.path.basename(path_to_file), os.path.dirname(path_to_file))
+
 
 urlpatterns = [
+    path('', serve_frontend, name='index'),
     path('admin/', admin.site.urls),
     path('auth/', include('user_accounts.urls')),
     path('api/', include('feedback.urls')),

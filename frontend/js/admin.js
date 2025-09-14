@@ -5,9 +5,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load initial data
     loadMetrics();
     
-    // Setup course form handler
-    document.getElementById('courseForm').addEventListener('submit', handleAddCourse);
-});
+    
+  });
 
 // Show/hide sections
 function showSection(sectionName) {
@@ -157,17 +156,18 @@ async function loadStudents() {
     }
 }
 
-// Load courses
+
+// load courses
 async function loadCourses() {
     const loadingEl = document.getElementById('coursesLoading');
     const listEl = document.getElementById('coursesList');
-    
+
     try {
         loadingEl.style.display = 'block';
         listEl.innerHTML = '';
-        
+
         const data = await api.getCourses();
-        
+
         if (data.courses && data.courses.length > 0) {
             listEl.innerHTML = data.courses.map(course => `
                 <div class="feedback-item">
@@ -175,19 +175,71 @@ async function loadCourses() {
                     <p>${course.description || 'No description'}</p>
                     <small>ID: ${course.id || course._id || 'No ID'}</small><br>
                     <small>Created: ${course.created_at ? new Date(course.created_at).toLocaleDateString() : 'Unknown'}</small>
+                    <div style="margin-top: 0.5rem;">
+                        <button class="edit-course-btn" data-id="${course.id}">Edit</button>
+                        <button class="delete-course-btn" data-id="${course.id}">Delete</button>
+                    </div>
                 </div>
             `).join('');
         } else {
             listEl.innerHTML = '<p class="loading">No courses found.</p>';
         }
-        
+
         loadingEl.style.display = 'none';
-        
     } catch (error) {
         console.error('Error loading courses:', error);
         loadingEl.textContent = 'Error loading courses';
     }
 }
+
+// Delegated listener for edit/delete
+document.getElementById('coursesList').addEventListener('click', async (e) => {
+    const courseId = e.target.dataset.id;
+    if (!courseId) return;
+
+    // DELETE
+    if (e.target.classList.contains('delete-course-btn')) {
+        if (!confirm('Are you sure you want to delete this course?')) return;
+        try {
+            await api.deleteCourse(courseId);
+            showMessage('Course deleted successfully!', 'success');
+            loadCourses();
+        } catch (error) {
+            showMessage('Error deleting course: ' + error.message);
+        }
+    }
+
+    // EDIT
+    if (e.target.classList.contains('edit-course-btn')) {
+        const courseData = await api.getCourse(courseId);
+        document.getElementById('editCourseName').value = courseData.name;
+        document.getElementById('editCourseDescription').value = courseData.description || '';
+        document.getElementById('editCourseForm').style.display = 'block';
+
+        const editForm = document.getElementById('editCourseForm');
+        editForm.onsubmit = null; // remove old listener
+
+        editForm.onsubmit = async function(evt) {
+            evt.preventDefault();
+            try {
+                await api.updateCourse(courseId, {
+                    name: document.getElementById('editCourseName').value,
+                    description: document.getElementById('editCourseDescription').value
+                });
+                showMessage('Course updated successfully!', 'success');
+                editForm.reset();
+                editForm.style.display = 'none';
+                loadCourses();
+            } catch (error) {
+                showMessage('Error updating course: ' + error.message);
+            }
+        };
+    }
+
+});
+
+
+
 
 // Student management functions
 async function blockStudent(studentId) {
@@ -231,33 +283,35 @@ function showAddCourseForm() {
 
 function hideAddCourseForm() {
     document.getElementById('addCourseForm').style.display = 'none';
-    document.getElementById('courseForm').reset();
+    document.getElementById('addCourseForm').reset();
 }
 
-async function handleAddCourse(e) {
+
+document.getElementById('addCourseForm').addEventListener('submit', async function(e) {
     e.preventDefault();
-    
-    const name = document.getElementById('courseName').value;
-    const description = document.getElementById('courseDescription').value;
+
+    const name = document.getElementById('addCourseName').value;
+    const description = document.getElementById('addCourseDescription').value;
     const submitBtn = e.target.querySelector('button[type="submit"]');
-    
+
     try {
         submitBtn.disabled = true;
         submitBtn.textContent = 'Adding...';
-        
+
         await api.createCourse({ name, description });
-        
+
         showMessage('Course added successfully!', 'success');
-        hideAddCourseForm();
-        loadCourses(); // Reload courses list
-        
+        e.target.reset();
+        loadCourses();
     } catch (error) {
         showMessage('Error adding course: ' + error.message);
     } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = 'Add Course';
     }
-}
+});
+
+
 
 // Export feedback
 async function exportFeedback() {

@@ -98,14 +98,19 @@ def change_password(request):
     current_password = request.data.get('current_password')
     new_password = request.data.get('new_password')
 
+    # Check if passwords are provided
+    if not current_password or not new_password:
+        return Response({"error": "Both current and new passwords are required"}, status=400)
+
+    # Check current password
     if not bcrypt.checkpw(current_password.encode('utf-8'), user.password.encode('utf-8')):
         return Response({"error": "Current password is incorrect"}, status=400)
 
-    # validate new password
+    # Validate new password
     if len(new_password) < 8 or not re.search(r'\d', new_password) or not re.search(r'[!@#$%^&*(),.?\":{}|<>]', new_password):
         return Response({"error": "New password does not meet requirements"}, status=400)
 
-    # hash new password
+    # Hash new password
     salt = bcrypt.gensalt()
     hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), salt).decode('utf-8')
     user.password = hashed_password

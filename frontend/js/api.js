@@ -1,4 +1,9 @@
-const API_BASE = 'http://127.0.0.1:8000';
+// Replace localhost references with:
+const API_BASE = window.location.origin;
+
+// Your API calls should now be:
+fetch(`${API_BASE}/api/auth/login/`)
+fetch(`${API_BASE}/api/feedback/`)
 
 class ApiClient {
     constructor() {

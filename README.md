@@ -23,8 +23,8 @@ Before you begin, ensure you have the following installed:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/prasdud/course-feedback-system/
-cd course-feedback-system
+git clone <your-repository-url>
+cd course-feedback-project
 ```
 
 ### 2. Backend Setup
@@ -47,17 +47,23 @@ python3 -m venv venv
 source venv/bin/activate
 ```
 
+Install required dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
 ### 3. Environment Configuration
 
 Create a `.env` file in the backend directory with the following configuration:
 
 ```env
 DEBUG=False
-SECRET_KEY=DJANGO-SECRET-KEY
-DB_URI=DJANGO-ATLAS-URI
-CLOUDINARY_CLOUD_NAME=CLOUDINARY-CLOUD-NAME
-CLOUDINARY_API_KEY=CLOUDINARY-API-KEY
-CLOUDINARY_API_SECRET=CLOUDINARY-API-SECRET
+SECRET_KEY=your-django-secret-key
+DB_URI=your-mongodb-atlas-connection-string
+CLOUDINARY_CLOUD_NAME=your-cloudinary-cloud-name
+CLOUDINARY_API_KEY=your-cloudinary-api-key
+CLOUDINARY_API_SECRET=your-cloudinary-api-secret
 ```
 
 ### 4. Setting Up External Services
@@ -76,14 +82,7 @@ CLOUDINARY_API_SECRET=CLOUDINARY-API-SECRET
    - API Secret
 3. Update the corresponding values in the `.env` file
 
-### 5. Run Database Migrations
-
-```bash
-python manage.py makemigrations
-python manage.py migrate
-```
-
-### 6. Start the Backend Server
+### 5. Start the Backend Server
 
 ```bash
 python manage.py runserver
@@ -91,7 +90,7 @@ python manage.py runserver
 
 The backend will be available at `http://127.0.0.1:8000/`
 
-### 7. Frontend Setup
+### 6. Frontend Setup
 
 Open a new terminal and navigate to the frontend directory:
 
@@ -99,12 +98,12 @@ Open a new terminal and navigate to the frontend directory:
 cd frontend/
 ```
 
-Start the frontend using a live server:
+Start the frontend using a live server on port 5500:
 - If using VS Code: Right-click on `index.html` and select "Open with Live Server"
-- If using Python: `python -m http.server 8080`
-- If using Node.js: Install `live-server` globally and run `live-server`
+- If using Python: `python -m http.server 5500`
+- If using Node.js: Install `live-server` globally and run `live-server --port=5500`
 
-The frontend will typically be available at `http://127.0.0.1:5500/` or `http://localhost:8080/`
+The frontend will be available at `http://127.0.0.1:5500/`
 
 ## 👤 Default User Accounts
 

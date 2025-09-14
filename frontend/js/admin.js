@@ -46,7 +46,8 @@ async function loadMetrics() {
     try {
         loadingEl.style.display = 'block';
         contentEl.style.display = 'none';
-                
+        
+        
         const data = await api.getMetrics();
 
         document.getElementById('totalStudents').textContent = data.total_students || 0;
@@ -129,20 +130,21 @@ async function loadStudents() {
                             <tr>
                                 <td>${student.name}</td>
                                 <td>${student.email}</td>
-                                <td>${student.isBlocked ? 'Blocked' : 'Active'}</td>
+                                <td>${student.is_blocked ? 'Blocked' : 'Active'}</td>
                                 <td>${new Date(student.createdAt).toLocaleDateString()}</td>
                                 <td>
-                                    ${student.isBlocked 
-                                        ? `<button class="action-btn unblock" onclick="unblockStudent('${student._id}')">Unblock</button>`
-                                        : `<button class="action-btn block" onclick="blockStudent('${student._id}')">Block</button>`
+                                    ${student.is_blocked 
+                                        ? `<button class="action-btn unblock" onclick="unblockStudent('${student.id}')">Unblock</button>`
+                                        : `<button class="action-btn block" onclick="blockStudent('${student.id}')">Block</button>`
                                     }
-                                    <button class="action-btn delete" onclick="deleteStudent('${student._id}')">Delete</button>
+                                    <button class="action-btn delete" onclick="deleteStudent('${student.id}')">Delete</button>
                                 </td>
                             </tr>
                         `).join('')}
                     </tbody>
                 </table>
             `;
+            //MODIFYING _id to id
         } else {
             tableEl.innerHTML = '<p class="loading">No students found.</p>';
         }

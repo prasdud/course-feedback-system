@@ -46,13 +46,14 @@ async function loadMetrics() {
     try {
         loadingEl.style.display = 'block';
         contentEl.style.display = 'none';
-        
+                
         const data = await api.getMetrics();
-        
-        document.getElementById('totalStudents').textContent = data.totalStudents || 0;
-        document.getElementById('totalCourses').textContent = data.totalCourses || 0;
-        document.getElementById('totalFeedback').textContent = data.totalFeedback || 0;
-        document.getElementById('avgRating').textContent = (data.avgRating || 0).toFixed(1);
+
+        document.getElementById('totalStudents').textContent = data.total_students || 0;
+        document.getElementById('totalCourses').textContent = data.total_courses || 0;
+        document.getElementById('totalFeedback').textContent = data.total_feedback || 0;
+        document.getElementById('avgRating').textContent = (data.average_rating || 0).toFixed(1);
+
         
         loadingEl.style.display = 'none';
         contentEl.style.display = 'block';

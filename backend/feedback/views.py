@@ -76,14 +76,20 @@ def submit_feedback(request):
     if request.user.role != 'student':
         return Response({"error": "Only students can submit feedback"}, status=403)
 
-    data = request.data
-    data['student'] = request.user.id
+    data = request.data.copy()  # Make a mutable copy
+    data['student'] = str(request.user.id)  # Convert ObjectId to string
 
     serializer = FeedbackSerializer(data=data)
     if serializer.is_valid():
+        # You also need to get the actual Course object
+        try:
+            course = Course.objects.get(id=data['course'])
+        except Course.DoesNotExist:
+            return Response({"error": "Course not found"}, status=404)
+            
         Feedback(
             student=request.user,
-            course=serializer.validated_data['course'],
+            course=course,  # Pass the actual Course object
             rating=serializer.validated_data['rating'],
             message=serializer.validated_data.get('message', ''),
             created_at=timezone.now(),
@@ -92,7 +98,6 @@ def submit_feedback(request):
         return Response({"message": "Feedback submitted successfully"})
     else:
         return Response(serializer.errors, status=400)
-
 
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])

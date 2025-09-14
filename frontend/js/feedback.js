@@ -166,23 +166,117 @@ async function loadMyFeedback() {
         loadingEl.style.display = 'block';
         listEl.innerHTML = '';
         
-        // Note: This assumes there's an endpoint to get user's feedback
-        // Since it's not in the Postman collection, we'll simulate it
-        // In a real scenario, you'd need to add this endpoint to your Django backend
+        const data = await api.getMyFeedback(); // call the new backend endpoint
+        myFeedback = data.feedbacks || [];
+
+        console.log('Loaded my feedback:', myFeedback); // Debug log
+
+        if (myFeedback.length > 0) {
+            listEl.innerHTML = myFeedback.map(f => {
+                // Get feedback ID - handle different possible ID formats
+                const feedbackId = f.id || f._id || f.pk || String(f._id);
+                console.log('Feedback ID for display:', feedbackId, 'Original feedback object:', f); // Debug log
+                
+                return `
+                    <div class="feedback-item" id="feedback-${feedbackId}">
+                        <div class="feedback-header">
+                            <span class="rating">${'★'.repeat(f.rating)}${'☆'.repeat(5 - f.rating)} (${f.rating}/5)</span>
+                            <button onclick="editFeedback('${feedbackId}')">Edit</button>
+                            <button onclick="deleteFeedback('${feedbackId}')">Delete</button>
+                        </div>
+                        <p><strong>Course:</strong> ${f.course_name}</p>
+                        <p>${f.message}</p>
+                        <small>Submitted: ${new Date(f.created_at).toLocaleDateString()}</small>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            listEl.innerHTML = '<p class="loading">You have not submitted any feedback yet.</p>';
+        }
         
-        // For now, we'll show a message that this feature needs backend support
+    } catch (err) {
+        console.error('Error loading feedback:', err);
+        listEl.innerHTML = '<p class="loading">Error loading feedback.</p>';
+    } finally {
         loadingEl.style.display = 'none';
-        listEl.innerHTML = `
-            <div class="feedback-item">
-                <p><em>Previous feedback history will be displayed here.</em></p>
-                <small>Note: This requires additional backend endpoint implementation.</small>
-            </div>
-        `;
-        
-    } catch (error) {
-        console.error('Error loading my feedback:', error);
-        loadingEl.style.display = 'none';
-        listEl.innerHTML = '<p class="loading">Error loading feedback history</p>';
+    }
+}
+
+// edit feedback
+async function editFeedback(feedbackId) {
+    console.log('Editing feedback with ID:', feedbackId); // Debug log
+    console.log('Available feedback:', myFeedback); // Debug log
+    
+    // Try different ways to match the feedback ID
+    const feedback = myFeedback.find(f => {
+        const fId = f.id || f._id || f.pk || String(f._id);
+        console.log('Comparing:', fId, 'with', feedbackId); // Debug log
+        return String(fId) === String(feedbackId);
+    });
+    
+    if (!feedback) {
+        console.error('Feedback not found for ID:', feedbackId);
+        console.error('Available feedback IDs:', myFeedback.map(f => f.id || f._id || f.pk));
+        return showMessage('Feedback not found');
+    }
+
+    // populate form
+    document.getElementById('courseSelect').value = feedback.course_id;
+    document.getElementById('message').value = feedback.message;
+    selectedRating = feedback.rating;
+    updateStarDisplay();
+
+    // change form submit temporarily
+    const form = document.getElementById('feedbackForm');
+    const originalHandler = handleFeedbackSubmit;
+    form.removeEventListener('submit', handleFeedbackSubmit);
+    
+    form.addEventListener('submit', async function updateHandler(e) {
+        e.preventDefault();
+        try {
+            await api.updateFeedback(feedbackId, {
+                rating: selectedRating,
+                message: document.getElementById('message').value
+            });
+            showMessage('Feedback updated!', 'success');
+            form.reset();
+            selectedRating = 0;
+            updateStarDisplay();
+            loadMyFeedback();
+        } catch (err) {
+            showMessage('Error updating feedback: ' + err.message);
+        } finally {
+            // restore original submit handler
+            form.removeEventListener('submit', updateHandler);
+            form.addEventListener('submit', originalHandler);
+        }
+    });
+}
+
+// delete feedback
+async function deleteFeedback(feedbackId) {
+    // Check if feedbackId is valid
+    if (!feedbackId || feedbackId === 'undefined' || feedbackId === 'null') {
+        console.error('Invalid feedback ID for deletion:', feedbackId);
+        return showMessage('Invalid feedback ID');
+    }
+    
+    if (!confirm('Are you sure you want to delete this feedback?')) return;
+    
+    try {
+        await api.deleteFeedback(feedbackId);
+        showMessage('Feedback deleted!', 'success');
+        document.getElementById('feedback-' + feedbackId)?.remove();
+        // Also remove from local array
+        myFeedback = myFeedback.filter(f => {
+            let fId = f.id;
+            if (!fId || fId === 'undefined') fId = f._id;
+            if (!fId || fId === 'undefined') fId = f.pk;
+            return String(fId) !== String(feedbackId);
+        });
+    } catch (err) {
+        console.error('Delete error:', err);
+        showMessage('Error deleting feedback: ' + err.message);
     }
 }
 

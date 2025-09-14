@@ -1,12 +1,96 @@
+let allFeedback = [];
+let adminCourses = [];
+
 // Check admin access on page load
 document.addEventListener('DOMContentLoaded', function() {
     if (!requireAdmin()) return;
     
     // Load initial data
     loadMetrics();
-    
+    loadAllFeedback();
+    loadCoursesForFilter();
     
   });
+
+
+async function loadCoursesForFilter() {
+    const courseSelect = document.getElementById('filterCourse');
+    courseSelect.innerHTML = '<option value="">All Courses</option>';
+
+    try {
+        const data = await api.getCourses();
+        adminCourses = data.courses || [];
+
+        adminCourses.forEach(course => {
+            const option = document.createElement('option');
+            option.value = course.id; // make sure this matches your feedback course_id
+            option.textContent = course.name;
+            courseSelect.appendChild(option);
+        });
+    } catch (err) {
+        console.error('Error loading courses for filter:', err);
+    }
+}
+
+document.getElementById('applyFilters').addEventListener('click', () => {
+    const courseId = document.getElementById('filterCourse').value;
+    const rating = document.getElementById('filterRating').value;
+    const studentName = document.getElementById('filterStudent').value.toLowerCase();
+
+    const filtered = allFeedback.filter(f => {
+        let match = true;
+
+        if (courseId) match = match && (f.course_id === courseId);
+        if (rating) match = match && (f.rating === parseInt(rating));
+        if (studentName) match = match && f.student_name.toLowerCase().includes(studentName);
+
+        return match;
+    });
+
+    renderAdminFeedback(filtered);
+});
+
+
+
+function renderAdminFeedback(feedbackArray) {
+    const listEl = document.getElementById('feedbackList');
+    listEl.innerHTML = '';
+
+    if (!feedbackArray.length) {
+        listEl.innerHTML = '<p>No feedback found.</p>';
+        return;
+    }
+
+    feedbackArray.forEach(f => {
+        const item = document.createElement('div');
+        item.className = 'feedback-item';
+        item.innerHTML = `
+            <div><strong>Course:</strong> ${f.course_name}</div>
+            <div><strong>Student:</strong> ${f.student_name}</div>
+            <div><strong>Rating:</strong> ${f.rating} ★</div>
+            <div>${f.message}</div>
+        `;
+        listEl.appendChild(item);
+    });
+}
+
+
+async function loadAllFeedback() {
+    const loadingEl = document.getElementById('feedbackLoading');
+    loadingEl.style.display = 'block';
+
+    try {
+        const data = await api.getAdminFeedback(); // call backend
+        allFeedback = data.feedbacks || [];
+        renderAdminFeedback(allFeedback);
+    } catch (err) {
+        console.error(err);
+        document.getElementById('feedbackList').innerHTML = '<p>Error loading feedback.</p>';
+    } finally {
+        loadingEl.style.display = 'none';
+    }
+}
+
 
 // Show/hide sections
 function showSection(sectionName) {
@@ -313,6 +397,7 @@ document.getElementById('addCourseForm').addEventListener('submit', async functi
 
 
 
+
 // Export feedback
 async function exportFeedback() {
     try {
@@ -344,3 +429,4 @@ function showMessage(message, type = 'error') {
         messageEl.style.display = 'none';
     }, 5000);
 }
+

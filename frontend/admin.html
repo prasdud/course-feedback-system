@@ -50,6 +50,26 @@
                 </div>
             </div>
 
+            <div id="feedbackFilters">
+                <select id="filterCourse">
+                    <option value="">All Courses</option>
+                    <!-- populate courses dynamically -->
+                </select>
+
+                <select id="filterRating">
+                    <option value="">All Ratings</option>
+                    <option value="1">1 ★</option>
+                    <option value="2">2 ★</option>
+                    <option value="3">3 ★</option>
+                    <option value="4">4 ★</option>
+                    <option value="5">5 ★</option>
+                </select>
+
+                <input type="text" id="filterStudent" placeholder="Student name">
+
+                <button id="applyFilters">Apply Filters</button>
+            </div>
+
             <!-- Feedback Section -->
             <div id="feedbackSection" class="section">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">

@@ -116,7 +116,7 @@ class ApiClient {
     }
 
     // Admin endpoints
-    async getAdminFeedback() {
+    async getAdminFeedback(queryString = '') {
         return this.request('/api/admin/feedback/');
     }
 
@@ -156,7 +156,25 @@ class ApiClient {
     async getFeedbackTrends() {
         return this.request('/api/feedback-trends/');
     }
+    
+    // Student feedback endpoints
+    async getMyFeedback() {
+        return this.request('/api/feedback/');
+    }
+    
+    async updateFeedback(feedbackId, data) {
+        return this.request(`/api/feedback/${feedbackId}/edit/`, {
+            method: 'PUT',
+            body: JSON.stringify(data)
+        });
+    }
 
+    async deleteFeedback(feedbackId) {
+        return this.request(`/api/feedback/${feedbackId}/delete/`, {
+            method: 'DELETE'
+        });
+    }
+    
     // Helper methods
     setToken(token) {
         this.token = token;

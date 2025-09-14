@@ -20,7 +20,7 @@ from django.views.static import serve
 from django.conf import settings
 
 def serve_frontend(request, filename='index.html'):
-    path_to_file = os.path.join(settings.BASE_DIR, 'frontend', filename)
+    path_to_file = os.path.join(settings.FRONTEND_DIR, filename)
     return serve(request, os.path.basename(path_to_file), os.path.dirname(path_to_file))
 
 

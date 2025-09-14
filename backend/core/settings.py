@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+from django.conf import settings
 from mongoengine import connect
 import os
 from dotenv import load_dotenv
@@ -31,13 +32,14 @@ connect(host=MONGO_URI, alias='default')
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-FRONTEND_DIR = os.path.join(BASE_DIR, 'frontend')  # path to your frontend folder
+FRONTEND_DIR = os.path.join(BASE_DIR, '..', 'frontend')
 
 STATICFILES_DIRS = [
-    os.path.join(FRONTEND_DIR, 'css'),
-    os.path.join(FRONTEND_DIR, 'js'),
-    os.path.join(FRONTEND_DIR, 'assets'),  # if you have images
+    os.path.join(settings.FRONTEND_DIR, 'css'),
+    os.path.join(settings.FRONTEND_DIR, 'js'),
+    os.path.join(settings.FRONTEND_DIR, 'assets'),
 ]
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
